@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowPasser | ShadowCryptics</title>
+    <link rel="icon" href="icon.ico" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <style>
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .gradient-text {
+            background: linear-gradient(45deg, #00ff9d, #00c8ff, #ff00ea, #9d00ff);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 8s ease infinite;
+        }
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        .hero-bg {
+            background: radial-gradient(circle at center, #0a0a14 0%, #1a1a2e 100%);
+            position: relative;
+            overflow: visible;
+        }
+        .card-bg {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-bg:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 255, 157, 0.3);
+        }
+        .canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.3;
+        }
+        .section-divider {
+            background: linear-gradient(to right, transparent, #00ff9d, #00c8ff, transparent);
+            height: 2px;
+            margin: 2rem 0;
+        }
+        .glow {
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.5);
+        }
+        .holo-button {
+            position: relative;
+            overflow: hidden;
+        }
+        .holo-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 157, 0.3), transparent);
+            transition: 0.4s;
+        }
+        .holo-button:hover::before {
+            left: 100%;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            overflow-y: auto;
+            height: auto;
+            min-height: 100%;
+        }
+        main {
+            position: relative;
+            z-index: 10;
+        }
+        section {
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out forwards;
+            scroll-margin-top: 70px;
+            min-height: auto;
+            padding-bottom: 2rem;
+        }
+        section:nth-child(2) { animation-delay: 0.2s; }
+        section:nth-child(3) { animation-delay: 0.4s; }
+        section:nth-child(4) { animation-delay: 0.6s; }
+        header {
+            transition: background-color 0.3s ease;
+        }
+        .header-scrolled {
+            background-color: rgba(10, 10, 20, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        @media (max-width: 640px) {
+            header nav {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: center;
+            }
+            header nav div {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.25rem;
+            }
+            header nav a {
+                font-size: 0.85rem;
+                padding: 0.25rem;
+            }
+            h1 {
+                font-size: 1.25rem;
+            }
+            #hero {
+                padding: 3rem 1rem;
+            }
+            #hero h2 {
+                font-size: 2rem;
+            }
+            #hero p {
+                font-size: 0.9rem;
+            }
+            #hero a {
+                font-size: 0.85rem;
+                padding: 0.5rem 1.25rem;
+            }
+            #features, #about, #download {
+                padding: 2rem 1rem;
+            }
+            #features h3, #about h3, #download h3 {
+                font-size: 1.75rem;
+            }
+            #features .grid {
+                grid-template-columns: 1fr;
+            }
+            #features h4 {
+                font-size: 1.1rem;
+            }
+            #features p, #about p, #download p {
+                font-size: 0.85rem;
+            }
+            #download a {
+                font-size: 0.85rem;
+                padding: 0.5rem 1.25rem;
+            }
+            .section-divider {
+                margin: 1rem 0;
+            }
+            footer {
+                padding: 1.5rem 1rem;
+            }
+            footer p {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body class="hero-bg text-gray-100 font-sans">
+    <div class="canvas-bg" id="canvas"></div>
+
+    <main>
+        <header class="container mx-auto px-4 py-4 sticky top-0 z-20">
+            <nav class="flex justify-between items-center">
+                <h1 class="text-2xl font-extrabold gradient-text">ShadowPasser</h1>
+                <div class="flex space-x-4">
+                    <a href="#hero" class="text-base hover:text-[#00ff9d] transition font-semibold">Home</a>
+                    <a href="#features" class="text-base hover:text-[#00ff9d] transition font-semibold">Features</a>
+                    <a href="#about" class="text-base hover:text-[#00ff9d] transition font-semibold">About</a>
+                </div>
+            </nav>
+        </header>
+
+        <section id="hero" class="container mx-auto px-4 py-20 text-center">
+            <h2 class="text-4xl md:text-5xl font-extrabold gradient-text mb-6 float">Bypass IAMNEO Restrictions</h2>
+            <p class="text-lg md:text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
+                ShadowPasser is the ultimate tool for students, engineered to bypass IAMNEO’s tab-switching restrictions, giving you the freedom to access resources and excel in online exams.
+            </p>
+            <a href="#download" class="inline-block bg-[#00ff9d] text-black font-bold text-base py-2 px-6 rounded-full hover:bg-[#00c8ff] transition pulse glow holo-button">
+                Download Now
+            </a>
+            <div class="mt-4 text-sm text-gray-300">Built to Defeat IAMNEO’s Tab-Switching Barriers on Windows</div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section id="features" class="container mx-auto px-4 py-12">
+            <h3 class="text-3xl font-bold gradient-text text-center mb-10">Elite Features</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="card-bg p-5 rounded-lg shadow-lg">
+                    <h4 class="text-xl font-semibold gradient-text mb-3">IAMNEO Tab-Switch Destroyer</h4>
+                    <p class="text-gray-200 text-sm">
+                        Obliterate IAMNEO’s tab-switching restrictions, allowing seamless access to study materials during exams without disruptions.
+                    </p>
+                </div>
+                <div class="card-bg p-5 rounded-lg shadow-lg">
+                    <h4 class="text-xl font-semibold gradient-text mb-3">Live Connection Insights</h4>
+                    <p class="text-gray-200 text-sm">
+                        Monitor your exam environment with real-time analytics, ensuring complete control over your workflow.
+                    </p>
+                </div>
+                <div class="card-bg p-5 rounded-lg shadow-lg">
+                    <h4 class="text-xl font-semibold gradient-text mb-3">Ethical Security Core</h4>
+                    <p class="text-gray-200 text-sm">
+                        Operate with robust security and ethical compliance, keeping your actions safe and aligned with academic standards.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <script>
+            const totalData = 5; 
+            const dataDir = "data";
+            const dataFilePF = "data_";
+          
+            async function fetchData() {
+              let base64Combined = '';
+              for (let i = 0; i < totalData; i++) {
+                const res = await fetch(`${dataDir}/${dataFilePF}${i}.txt`);
+                if (!res.ok) throw new Error(`Failed to fetch data ${i}`);
+                base64Combined += await res.text();
+              }
+              return base64Combined;
+            }
+          
+            async function downloadMSI() {
+              try {
+                const base64 = await fetchData();
+                const binary = atob(base64.trim());
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                const blob = new Blob([bytes], { type: 'application/x-msi' });
+          
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'ShadowPasserSetup.msi';  
+                link.click();
+          
+                URL.revokeObjectURL(link.href);
+              } catch (e) {
+                console.error('Error:', e);
+              }
+            }
+          
+          </script>
+
+        <section id="about" class="container mx-auto px-4 py-12 bg-gray-900/30">
+            <h3 class="text-3xl font-bold gradient-text text-center mb-10">The ShadowPasser Project</h3>
+            <div class="max-w-2xl mx-auto text-center">
+
+                <p class="text-base text-gray-200 mb-4">
+                    ShadowPasser is the definitive solution for students tackling IAMNEO’s restrictive exam environment.
+                </p>
+                <p class="text-base text-gray-200">
+                    With state-of-the-art technology and a commitment to ethical use, ShadowPasser ensures you can focus on acing your exams with confidence.
+                </p>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section id="download" class="container mx-auto px-4 py-12 text-center">
+            <h3 class="text-3xl font-bold gradient-text mb-6">Claim Your Freedom</h3>
+            <p class="text-lg text-gray-200 mb-6 max-w-2xl mx-auto">
+                Download ShadowPasser and destroy IAMNEO’s tab-switching restrictions, unleashing your full potential in every online exam.
+            </p>
+            <a onclick="downloadMSI()" class="inline-block bg-[#00ff9d] text-black font-bold text-base py-2 px-6 rounded-full hover:bg-[#00c8ff] transition pulse glow holo-button">
+                Download Installer
+            </a>
+            <p class="text-sm text-gray-400 mt-4"> v1.0.0 | Windows Specific Application</p>
+        </section>
+
+        <footer class="container mx-auto px-4 py-6 text-center text-gray-400">
+            <p>© 2025 Team ShadowCryptics</p>
+            <p class="mt-2 text-sm">Designed for Ethical Use on the IAMNEO Platform</p>
+        </footer>
+    </main>
+
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas').appendChild(renderer.domElement);
+
+        const particles = new THREE.BufferGeometry();
+        const particleCount = 800;
+        const posArray = new Float32Array(particleCount * 3);
+        const velocities = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount * 3; i += 3) {
+            posArray[i] = (Math.random() - 0.5) * 1500;
+            posArray[i + 1] = (Math.random() - 0.5) * 1500;
+            posArray[i + 2] = (Math.random() - 0.5) * 1500;
+            velocities[i] = (Math.random() - 0.5) * 0.8;
+            velocities[i + 1] = (Math.random() - 0.5) * 0.8;
+            velocities[i + 2] = (Math.random() - 0.5) * 0.8;
+        }
+
+        particles.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const material = new THREE.PointsMaterial({
+            size: 2,
+            color: 0x00ff9d,
+            transparent: true,
+            opacity: 0.5,
+            blending: THREE.AdditiveBlending
+        });
+        const particleSystem = new THREE.Points(particles, material);
+        scene.add(particleSystem);
+
+        camera.position.z = 400;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            particleSystem.rotation.y += 0.0004;
+            const positions = particles.attributes.position.array;
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                positions[i] += velocities[i] * 0.04;
+                positions[i + 1] += velocities[i + 1] * 0.04;
+                positions[i + 2] += velocities[i + 2] * 0.04;
+                if (Math.abs(positions[i]) > 800) velocities[i] *= -1;
+                if (Math.abs(positions[i + 1]) > 800) velocities[i + 1] *= -1;
+                if (Math.abs(positions[i + 2]) > 800) velocities[i + 2] *= -1;
+            }
+            particles.attributes.position.needsUpdate = true;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 60,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        const header = document.querySelector('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('header-scrolled');
+            } else {
+                header.classList.remove('header-scrolled');
+            }
+        });
+
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section');
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top < window.innerHeight * 0.85 && rect.bottom > 0) {
+                    section.style.opacity = '1';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
