@@ -2,40 +2,38 @@
     const blockedDomain = "service-fb-examly-io-7tvaoi4e5q-uk.a.run.app";
     const pathPrefix = "/api";
 
+    // Fake 403 Response
     const fake403 = new Response("403 Forbidden", {
         status: 403,
         statusText: "Forbidden",
         headers: { "Content-Type": "text/plain" }
     });
 
-    // Intercept fetch requests
+    // Patch fetch to block specific API paths
     const originalFetch = window.fetch;
     window.fetch = function(input, init) {
         const url = typeof input === 'string' ? input : input.url;
         if (url.includes(blockedDomain) && new URL(url).pathname.startsWith(pathPrefix)) {
-            console.warn("[Blocked fetch] " + url);
+            console.warn("[Blocked fetch]", url);
             return Promise.resolve(fake403.clone());
         }
         return originalFetch(input, init);
     };
 
-    // Intercept XMLHttpRequests
+    // Patch XMLHttpRequest to block specific API paths
     const originalXHROpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function(method, url) {
-        this._url = url; // Store for later use in send()
+        this._url = url;
         originalXHROpen.apply(this, arguments);
     };
-
     const originalXHRSend = XMLHttpRequest.prototype.send;
     XMLHttpRequest.prototype.send = function() {
-        const url = this._url;
-        if (url && url.includes(blockedDomain) && new URL(url).pathname.startsWith(pathPrefix)) {
-            console.warn("[Blocked XHR] " + url);
+        if (this._url && this._url.includes(blockedDomain) && new URL(this._url).pathname.startsWith(pathPrefix)) {
+            console.warn("[Blocked XHR]", this._url);
             this.readyState = 4;
             this.status = 403;
             this.statusText = "Forbidden";
             this.responseText = "403 Forbidden";
-
             this.onreadystatechange && this.onreadystatechange();
             this.onload && this.onload();
         } else {
@@ -43,10 +41,9 @@
         }
     };
 
-    // Aggressively allow paste
-    function forceEnablePaste() {
-        const elements = document.querySelectorAll('input, textarea');
-        elements.forEach(el => {
+    // Kill all paste-blocking behaviors
+    function allowPaste() {
+        document.querySelectorAll('input, textarea').forEach(el => {
             try {
                 el.onpaste = null;
                 el.removeAttribute('onpaste');
@@ -54,32 +51,30 @@
                 const clone = el.cloneNode(true);
                 el.parentNode.replaceChild(clone, el);
 
-                clone.addEventListener('paste', (e) => {
-                    e.stopImmediatePropagation();
-                }, true);
+                clone.addEventListener('paste', e => e.stopImmediatePropagation(), true);
             } catch (err) {
-                console.warn("Paste unblock failed on element:", err);
+                console.warn("Error unblocking paste on:", el, err);
             }
         });
     }
 
-    // Block new 'paste' listeners
+    // Intercept paste-blocking event listeners globally
     const originalAddEventListener = EventTarget.prototype.addEventListener;
     EventTarget.prototype.addEventListener = function(type, listener, options) {
         if (type === 'paste') {
-            console.warn("Blocked a paste event listener.");
+            console.warn("Blocked site from attaching a paste listener.");
             return;
         }
         return originalAddEventListener.apply(this, arguments);
     };
 
-    // Watch DOM for new elements to keep enabling paste
-    const observer = new MutationObserver(() => {
-        forceEnablePaste();
-    });
+    // Keep cleaning up the DOM on every mutation
+    const observer = new MutationObserver(() => allowPaste());
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // Periodically reapply
-    setInterval(forceEnablePaste, 500);
-    forceEnablePaste();
+    // Also reapply periodically
+    setInterval(allowPaste, 500);
+
+    // Initial cleanup
+    allowPaste();
 })();
