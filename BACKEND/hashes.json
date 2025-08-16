@@ -1,0 +1,70 @@
+[
+    {
+        "File":  "manifest.json",
+        "SHA256":  "FAA8984988AF6452201FE4F258D2D08BBF66BB8C4D2D94CEB40652732E767752"
+    },
+    {
+        "File":  "rules.json",
+        "SHA256":  "2A4CCFA5E0E28612FAC0F31273C4AECD2941A7D8B1A9CE8FC0DABA76D76DC211"
+    },
+    {
+        "File":  "hooks\\ace-mod.js",
+        "SHA256":  "96B163FDCDA57B21BE1CC97706A7E35011343EBA741AD520D0EB92D487E229E4"
+    },
+    {
+        "File":  "hooks\\bypass.js",
+        "SHA256":  "F2A3CF4D114E784AF22DEF9AAE7B935B8D79728E6CEBD8355F880D46E770CE9F"
+    },
+    {
+        "File":  "hooks\\interceptor.js",
+        "SHA256":  "C075D75F20BC9C22E1921488C792B0C1F3AEC1505342EF451CEB0D04809A9281"
+    },
+    {
+        "File":  "hooks\\utils.js",
+        "SHA256":  "B2A3A73CB5949DBF832892F1B8BB635F11BA3906728EE3FADA4A28C65EABB2DB"
+    },
+    {
+        "File":  "images\\hashes.json",
+        "SHA256":  "86E5B845BFC1192051BDCC3F7A6451A1AB7C33F5A8FCAD70C09F1704882264A5"
+    },
+    {
+        "File":  "images\\icon128.png",
+        "SHA256":  "104F1698F1910E9D547F4112566275975D88958D05D3C16636F25906A8242BB9"
+    },
+    {
+        "File":  "images\\icon16.png",
+        "SHA256":  "497C27EB4333B11463D125748DCD6F13FD97200147DF874FA6834680D20DCE45"
+    },
+    {
+        "File":  "images\\icon48.png",
+        "SHA256":  "27BF8C2AE7D1CE0B4DE3AC99A6193CA00CBC14FE8F84D3A7DB3354CBF7ECDA3D"
+    },
+    {
+        "File":  "libs\\firebase-app-compat.js",
+        "SHA256":  "4AD731805B8A160236A449DBCD463D8AD325703707EC9F7FCDC33561FC4EB7CA"
+    },
+    {
+        "File":  "libs\\firebase-firestore-compat.js",
+        "SHA256":  "A961FA5A76D0A9C04E02930EE29C040387288DAA4E00E02AC1D07A6C16ACBC2F"
+    },
+    {
+        "File":  "libs\\interceptor.js",
+        "SHA256":  "8EB1E9F69333C20F95B0A3C6C49E9BF6A674EF91E71ED810E86DFB53D5016B82"
+    },
+    {
+        "File":  "scripts\\background.js",
+        "SHA256":  "51EDE1B288BB21A1A6F4F1954193BFA4AF2F1503D781D1B5291E1CE5D6D7AA4E"
+    },
+    {
+        "File":  "scripts\\content-script.js",
+        "SHA256":  "8A6A4182F39EB06710CFBAE83E4E490CC2865F2F1FED41D146F66FBBC52EF22D"
+    },
+    {
+        "File":  "scripts\\interface.js",
+        "SHA256":  "8C8A808C76911B3AF2B136449FE72F1AACD39B1E70FC4A1428E6571BECA20225"
+    },
+    {
+        "File":  "scripts\\utils.js",
+        "SHA256":  "5E6309CF7429DF94004CF451AD187221F495B2381E530C60B72027D516DBC9B1"
+    }
+]
